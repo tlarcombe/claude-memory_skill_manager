@@ -90,12 +90,15 @@ def fzf(
     if result.returncode not in (0, 1):
         return _NO_RESULT  # Esc or Ctrl-C
 
-    lines = result.stdout.strip().splitlines()
+    # Do NOT strip() before splitlines — when --expect is used fzf emits an
+    # empty first line when Enter is pressed (no expected key). Stripping would
+    # swallow that line and shift everything, making the selection unreadable.
+    lines = result.stdout.splitlines()
     if not lines:
         return _NO_RESULT
 
     if expect:
-        pressed = lines[0] if lines else ""
+        pressed = lines[0]                          # "" = Enter, "ctrl-i" = Ctrl-I, etc.
         raw = lines[1] if len(lines) > 1 else ""
     else:
         pressed = ""
