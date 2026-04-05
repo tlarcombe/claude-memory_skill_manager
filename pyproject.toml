@@ -1,0 +1,67 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "claude-manager"
+version = "0.1.0"
+description = "A manager for Claude Code addons: memory, skills, agents, and MCP servers"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+keywords = ["claude", "claude-code", "ai", "cli", "mcp", "agents"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Topic :: Utilities",
+]
+
+dependencies = [
+    "click>=8.1",
+    "rich>=13.0",
+    "pydantic>=2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.4",
+    "mypy>=1.10",
+]
+
+[project.scripts]
+claude-manager = "claude_manager.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/tlarcombe/claude-memory_skill_manager"
+Repository = "https://github.com/tlarcombe/claude-memory_skill_manager"
+Issues = "https://github.com/tlarcombe/claude-memory_skill_manager/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/claude_manager"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+mypy_path = "src"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=claude_manager --cov-report=term-missing --cov-fail-under=80"
+
+[tool.coverage.run]
+source = ["src/claude_manager"]
