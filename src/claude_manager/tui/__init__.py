@@ -12,12 +12,9 @@ from claude_manager.tui.screens import run_main, run_scope, run_tools
 
 
 def _view_file(path_str: str) -> None:
-    """Open a file in $EDITOR or fall back to less."""
-    editor = os.environ.get("EDITOR", "")
-    if editor:
-        subprocess.run([editor, path_str])
-    else:
-        subprocess.run(["less", path_str])
+    """Open a file in $EDITOR or fall back to nano."""
+    editor = os.environ.get("EDITOR", "nano")
+    subprocess.run([editor, path_str])
 
 
 def _confirm_delete(name: str) -> bool:
