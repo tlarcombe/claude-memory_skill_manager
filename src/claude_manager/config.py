@@ -7,6 +7,11 @@ from pathlib import Path
 
 USER_PROJECTS_DIR = Path.home() / "projects"
 
+# Registry — companion repo used for browsing and installing addons
+REGISTRY_REPO_URL = "https://github.com/tlarcombe/claude-addons"
+REGISTRY_JSON_URL = "https://raw.githubusercontent.com/tlarcombe/claude-addons/main/REGISTRY.json"
+REGISTRY_LOCAL_PATH = Path.home() / "projects" / "claude-addons"
+
 
 # ── Core paths ────────────────────────────────────────────────────────────────
 
