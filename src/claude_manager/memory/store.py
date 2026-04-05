@@ -1,9 +1,11 @@
-"""Read and write memory entries from disk."""
+"""Read memory entries from Claude Code's project memory store."""
+
+from __future__ import annotations
 
 import re
 from pathlib import Path
 
-from claude_manager.config import memory_dir
+from claude_manager.config import memory_store_dir
 from claude_manager.memory.models import MemoryEntry, MemoryType
 
 _FRONTMATTER_RE = re.compile(r"^---\n(.*?)\n---\n(.*)", re.DOTALL)
@@ -40,23 +42,16 @@ def load_entry(path: Path, project: str | None = None) -> MemoryEntry | None:
     )
 
 
-def list_entries(project_path: Path | None = None) -> list[MemoryEntry]:
-    base = memory_dir(project_path)
+def list_entries(project: Path) -> list[MemoryEntry]:
+    """List all memory entries for a specific project."""
+    base = memory_store_dir(project)
     if not base.exists():
         return []
     entries = []
-    project_label = str(project_path) if project_path else None
     for md in sorted(base.glob("*.md")):
         if md.name == "MEMORY.md":
             continue
-        entry = load_entry(md, project=project_label)
+        entry = load_entry(md, project=str(project))
         if entry:
             entries.append(entry)
     return entries
-
-
-def list_all_projects() -> list[str]:
-    projects_root = memory_dir()
-    if not projects_root.exists():
-        return []
-    return sorted(p.name for p in projects_root.iterdir() if p.is_dir())

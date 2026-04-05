@@ -65,3 +65,7 @@ addopts = "--cov=claude_manager --cov-report=term-missing --cov-fail-under=80"
 
 [tool.coverage.run]
 source = ["src/claude_manager"]
+omit = [
+    "*/tui/*",       # interactive fzf layer — not unit-testable
+    "*/cli.py",      # click entry points — covered by integration tests
+]

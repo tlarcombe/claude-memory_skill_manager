@@ -1,12 +1,15 @@
 """CLI commands for memory management."""
 
+from __future__ import annotations
+
 from pathlib import Path
 
 import click
 from rich.console import Console
 from rich.table import Table
 
-from claude_manager.memory.store import list_all_projects, list_entries
+from claude_manager.config import all_memory_project_slugs
+from claude_manager.memory.store import list_entries
 
 console = Console()
 
@@ -17,30 +20,28 @@ def memory() -> None:
 
 
 @memory.command("list")
-@click.option("--project", "-p", default=None, help="Project slug or path to filter by.")
-def list_cmd(project: str | None) -> None:
-    """List memory entries."""
-    project_path = Path(project) if project else None
-    entries = list_entries(project_path)
+@click.argument("project", type=click.Path(exists=True, file_okay=False, path_type=Path))
+def list_cmd(project: Path) -> None:
+    """List memory entries for PROJECT path."""
+    entries = list_entries(project)
     if not entries:
         console.print("[yellow]No memory entries found.[/yellow]")
         return
-    table = Table(title="Memory Entries", show_lines=True)
+    table = Table(title=f"Memory: {project.name}", show_lines=True)
     table.add_column("Type", style="cyan", no_wrap=True)
     table.add_column("Name", style="bold")
     table.add_column("Description")
-    table.add_column("Project", style="dim")
     for e in entries:
-        table.add_row(e.type.value, e.name, e.description, e.project or "")
+        table.add_row(e.type.value, e.name, e.description)
     console.print(table)
 
 
 @memory.command("projects")
 def projects_cmd() -> None:
     """List all projects that have memory entries."""
-    projects = list_all_projects()
-    if not projects:
+    slugs = all_memory_project_slugs()
+    if not slugs:
         console.print("[yellow]No projects found.[/yellow]")
         return
-    for p in projects:
-        console.print(f"  [cyan]{p}[/cyan]")
+    for s in slugs:
+        console.print(f"  [cyan]{s}[/cyan]")

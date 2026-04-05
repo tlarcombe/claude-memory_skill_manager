@@ -1,10 +1,12 @@
-"""Read agents from the Claude Code agents directory."""
+"""Read agents from global or project-local agent directories."""
+
+from __future__ import annotations
 
 import re
 from pathlib import Path
 
 from claude_manager.agents.models import Agent
-from claude_manager.config import agents_dir
+from claude_manager.config import global_agents_dir, project_agents_dir
 
 _FRONTMATTER_RE = re.compile(r"^---\n(.*?)\n---", re.DOTALL)
 _FIELD_RE = re.compile(r"^(\w+):\s*(.+)$", re.MULTILINE)
@@ -12,7 +14,7 @@ _LIST_FIELD_RE = re.compile(r"^(\w+):\s*\n((?:\s+-\s+.+\n?)+)", re.MULTILINE)
 _LIST_ITEM_RE = re.compile(r"^\s+-\s+(.+)$", re.MULTILINE)
 
 
-def _parse_agent_meta(path: Path) -> dict[str, str | list[str]]:
+def _parse_meta(path: Path) -> dict[str, str | list[str]]:
     try:
         text = path.read_text()
     except OSError:
@@ -27,15 +29,14 @@ def _parse_agent_meta(path: Path) -> dict[str, str | list[str]]:
     return meta
 
 
-def list_agents() -> list[Agent]:
-    base = agents_dir()
-    if not base.exists():
+def _load_from_dir(directory: Path) -> list[Agent]:
+    if not directory.exists():
         return []
     result = []
-    for md in sorted(base.glob("*.md")):
-        meta = _parse_agent_meta(md)
+    for md in sorted(directory.glob("*.md")):
+        meta = _parse_meta(md)
         tools_raw = meta.get("tools", [])
-        tools = tools_raw if isinstance(tools_raw, list) else [tools_raw]
+        tools = tools_raw if isinstance(tools_raw, list) else [str(tools_raw)]
         result.append(
             Agent(
                 name=str(meta.get("name", md.stem)),
@@ -46,3 +47,18 @@ def list_agents() -> list[Agent]:
             )
         )
     return result
+
+
+def list_global_agents() -> list[Agent]:
+    return _load_from_dir(global_agents_dir())
+
+
+def list_project_agents(project: Path) -> list[Agent]:
+    return _load_from_dir(project_agents_dir(project))
+
+
+def list_agents(project: Path | None = None) -> list[Agent]:
+    """Global agents. If project given, project-local agents only."""
+    if project is not None:
+        return list_project_agents(project)
+    return list_global_agents()
